@@ -5,18 +5,7 @@ _ext
 *.so
 maskrcnn_benchmark.egg-info/
 wetectron.egg-info/
-build/
-proposal/
-datasets/
-!wetectron/data/datasets
-dist/
-cache/
-apex/
-cocoapi/
-output/
-runs/
-configs/weak_old
-configs/voc_ignore
+
 
 # pytorch/python/numpy formats
 *.pth
@@ -32,7 +21,7 @@ configs/voc_ignore
 *.swo
 *.swp
 *~
-
+.git/
 # Pycharm editor settings
 .idea
 
