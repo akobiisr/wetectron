@@ -39,6 +39,7 @@ def build_dataset(dataset_list, transforms, dataset_catalog, is_train=True, prop
     for index, dataset_name in enumerate(dataset_list):
         is_labeled = "unlabeled" not in dataset_name
         data = dataset_catalog.get(dataset_name)
+        print('ARGSSSSS', data)
         factory = getattr(D, data["factory"])
         args = data["args"]
         # for COCODataset, we want to remove images without annotations during training
@@ -47,7 +48,7 @@ def build_dataset(dataset_list, transforms, dataset_catalog, is_train=True, prop
         if data["factory"] == "PascalVOCDataset":
             args["use_difficult"] = not is_train
         args["transforms"] = transforms
-        
+
         # load proposal
         _f = proposal_files[index]
         if _f is not None and _f.startswith("http"):
@@ -56,7 +57,7 @@ def build_dataset(dataset_list, transforms, dataset_catalog, is_train=True, prop
         args["proposal_file"] = _f
         
         # make dataset from factory
-        print('ARGSSSSS', args)
+
         dataset = factory(**args)
         datasets.append(dataset)
 
@@ -123,6 +124,7 @@ def make_data_loader(cfg, is_train=True, is_distributed=False, start_iter=0):
     # seed = cfg.SEED
     # def _init_fn(worker_id):
     #     np.random.seed(int(seed))
+
     num_gpus = get_world_size()
     if is_train:
         images_per_batch = cfg.SOLVER.IMS_PER_BATCH
@@ -171,6 +173,7 @@ def make_data_loader(cfg, is_train=True, is_distributed=False, start_iter=0):
     
     # If bbox aug is enabled in testing, simply set transforms to None and we will apply transforms later
     transforms = None if not is_train and cfg.TEST.BBOX_AUG.ENABLED else build_transforms(cfg, is_train)
+    print('ARGSSSSS', DatasetCatalog)
     datasets = build_dataset(dataset_list, transforms, DatasetCatalog, is_train, proposal_files)
     if is_train:
         # save category_id to label name mapping

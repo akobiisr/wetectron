@@ -31,6 +31,12 @@ from wetectron.utils.metric_logger import (MetricLogger, TensorboardLogger)
 from wetectron.modeling.cdb import ConvConcreteDB
 from azureml.core import Dataset, Workspace, Run
 import glob
+import zipfile
+
+import wetectron.config.paths_catalog as pcatalog
+print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+print(open(pcatalog.__file__).read())
+print("##########!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 try:
     from apex import amp
 except ImportError:
@@ -137,13 +143,15 @@ def train_cdb(cfg, local_rank, distributed, use_tensorboard=False):
     extra_checkpoint_data = checkpointer.load(cfg.MODEL.WEIGHT)
     arguments.update(extra_checkpoint_data)
 
+    print('Do CFG_DIRE', cfg.PATH_DATA_TRAIN)
     data_loader = make_data_loader(
         cfg,
         is_train=True,
         is_distributed=distributed,
         start_iter=arguments["iteration"],
     )
-    
+
+
     if use_tensorboard:
         meters = TensorboardLogger(
             log_dir=os.path.join(cfg['OUTPUT_DIR'], 'log/'),
@@ -241,6 +249,7 @@ def main():
         help="Use tensorboardX logger (Requires tensorboardX installed)",
         action="store_true",
     )
+    #################### AD CODE ##############
 
     args = parser.parse_args()
 
