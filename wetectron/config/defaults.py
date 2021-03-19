@@ -5,7 +5,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import os
 from yacs.config import CfgNode as CN
-
+CN.IMMUTABLE = False
 # -----------------------------------------------------------------------------
 # Convention about Training / Test specific parameters
 # -----------------------------------------------------------------------------
@@ -534,6 +534,7 @@ _C.TEST.VIS_THRES = 0.5
 # Misc options
 # ---------------------------------------------------------------------------- #
 _C.OUTPUT_DIR = "."
+_C.PATH_DATA_TRAIN = "."
 
 _C.PATHS_CATALOG = os.path.join(os.path.dirname(__file__), "paths_catalog.py")
 

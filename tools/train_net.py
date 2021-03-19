@@ -29,7 +29,8 @@ from wetectron.utils.logger import setup_logger
 from wetectron.utils.miscellaneous import mkdir, save_config, seed_all_rng
 from wetectron.utils.metric_logger import (MetricLogger, TensorboardLogger)
 from wetectron.modeling.cdb import ConvConcreteDB
-
+from azureml.core import Dataset, Workspace, Run
+import glob
 try:
     from apex import amp
 except ImportError:
@@ -203,6 +204,24 @@ def main():
         help="path to config file",
         type=str,
     )
+
+    parser.add_argument(
+        "--data_path",
+        type=str,
+        help="path to dataset training",
+
+    )
+
+    parser.add_argument(
+        "--proposal_path",
+        type=str,
+        help="path to proposal training",
+
+    )
+
+
+
+
     parser.add_argument("--local_rank", type=int, default=0)
     parser.add_argument(
         "--skip-test",
@@ -228,6 +247,35 @@ def main():
     num_gpus = int(os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
     args.distributed = num_gpus > 1
 
+    # begin: The rows tha
+    #run = Run.get_context()
+    #ws = run.experiment.workspace
+
+    #datastore = ws.get_default_datastore()
+    #dataset = Dataset.get_by_name(workspace=ws, name='datasets/voc')
+    #proposal = Dataset.get_by_name(workspace=ws, name= 'datasets/proposal')
+    #dataset = Dataset.File.from_files(path=(datastore, 'datasets/voc'))
+    #proposal = Dataset.File.from_files(path=(datastore, 'datasets/proposal'))
+
+    #dataset = dataset.as_named_input('inputdata').as_mount()
+    #proposal = proposal.as_named_input('inputp').as_mount()
+
+    print('Proposals path', args.proposal_path)
+    print('Dataset path', args.data_path)
+
+    #print('DATA SET FILES', os.listdir((os.path.join(args.data_path), 'datasets/voc')))
+    print('PROPOSALS SET FILES', os.listdir(args.proposal_path))
+
+    #cfg.DATASETS.TRAIN = (args.data_path, args.data_path)
+
+    #p_train_path = glob.glob(os.path.join(proposal.path_on_compute, '**/SS-voc_2007_train-boxes.pkl'), recursive=True)[0]
+    #p_val_path = glob.glob(os.path.join(proposal.path_on_compute, '**/SS-voc_2007_val-boxes.pkl'), recursive=True)[0]
+
+
+    #cfg.PROPOSAL_FILES.TRAIN = (args.proposal_path+'/SS-voc_2007_train-boxes.pkl', args.proposal_path+'/SS-voc_2007_val-boxes.pkl')
+
+    # End of added row
+
     if args.distributed:
         torch.cuda.set_device(args.local_rank)
         torch.distributed.init_process_group(
@@ -238,8 +286,14 @@ def main():
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     update_iters()
-    cfg.freeze()
 
+    ########   ADD ##############
+    cfg.PATH_DATA_TRAIN = args.data_path
+    cfg.PROPOSAL_FILES.TRAIN = (os.path.join(args.proposal_path, 'SS-voc_2007_train-boxes.pkl'),
+                                os.path.join(args.proposal_path, 'SS-voc_2007_val-boxes.pkl'),
+                                )
+    ############################
+    cfg.freeze()
     # make sure each worker has a different, yet deterministic seed if specified
     seed_all_rng(None if cfg.SEED < 0 else cfg.SEED + get_rank())
 
@@ -260,11 +314,12 @@ def main():
         logger.info(config_str)
     logger.info("Running with config:\n{}".format(cfg))
 
+
     output_config_path = os.path.join(cfg.OUTPUT_DIR, 'config.yml')
     logger.info("Saving config into: {}".format(output_config_path))
     # save overloaded model config in the output directory
     save_config(cfg, output_config_path)
-
+    print('CFG_DIRE', cfg.PATH_DATA_TRAIN)
     if cfg.DB.METHOD == "concrete":
         model = train_cdb(
             cfg=cfg,

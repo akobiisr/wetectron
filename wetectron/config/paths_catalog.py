@@ -6,9 +6,11 @@
 """Centralized catalog of paths."""
 
 import os
+from wetectron.config import cfg
 
 class DatasetCatalog(object):
-    DATA_DIR = "datasets"
+    DATA_DIR = os.path.join(cfg.PATH_DATA_TRAIN,"datasets")
+    print('DATA_DIR', DATA_DIR)
     DATASETS = {
         "coco_2017_train": {
             "img_dir": "coco/train2017",
@@ -119,7 +121,8 @@ class DatasetCatalog(object):
                 args=args,
             )
         elif "voc" in name:
-            data_dir = DatasetCatalog.DATA_DIR
+            data_dir = os.path.join(cfg.PATH_DATA_TRAIN,"datase")
+            print('DATAAAA', data_dir)
             attrs = DatasetCatalog.DATASETS[name]
             args = dict(
                 data_dir=os.path.join(data_dir, attrs["data_dir"]),

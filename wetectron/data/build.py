@@ -56,6 +56,7 @@ def build_dataset(dataset_list, transforms, dataset_catalog, is_train=True, prop
         args["proposal_file"] = _f
         
         # make dataset from factory
+        print('ARGSSSSS', args)
         dataset = factory(**args)
         datasets.append(dataset)
 
